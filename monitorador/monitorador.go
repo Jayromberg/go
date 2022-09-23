@@ -2,31 +2,35 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
-  "net/http"
+	"time"
 )
+
+const monitoramentos = 3
+const delay = 5
 
 func main() {
 
 	exibeIntroducao()
-  
-  for {
-    exibeMenu()
-    comando := leComando()
-  
-    switch comando {
-    case 1:
-      iniciarMonitoramento()
-    case 2:
-      fmt.Println("Exibindo Logs...")
-    case 0:
-      fmt.Println("Saindo do programa...")
-      os.Exit(0)
-    default:
-      fmt.Println("Não conheço este comando")
-      os.Exit(-1)
-    }
-  }
+
+	for {
+		exibeMenu()
+		comando := leComando()
+
+		switch comando {
+		case 1:
+			iniciarMonitoramento()
+		case 2:
+			fmt.Println("Exibindo Logs...")
+		case 0:
+			fmt.Println("Saindo do programa...")
+			os.Exit(0)
+		default:
+			fmt.Println("Não conheço este comando")
+			os.Exit(-1)
+		}
+	}
 }
 
 func exibeIntroducao() {
@@ -51,13 +55,31 @@ func leComando() int {
 }
 
 func iniciarMonitoramento() {
-  fmt.Println("Monitorando...")
-  site := "https://www.alura.com.br"
-  resp, _ := http.Get(site)
+	fmt.Println("Monitorando...")
 
-  if resp.StatusCode == 200 {
-      fmt.Println("Site:", site, "foi carregado com sucesso!")
-  } else {
-      fmt.Println("Site:", site, "está com problemas. Status Code:", resp.StatusCode)
-  }
+	sites := []string{"https://random-status-code.herokuapp.com/",
+		"https://www.alura.com.br", "https://www.caelum.com.br"}
+
+	for i := 0; i < monitoramentos; i++ {
+		for i, site := range sites {
+			fmt.Println("Testando site", i, ":", site)
+			testaSite(site)
+		}
+
+		// adição AQUI!
+		time.Sleep(delay * time.Second)
+		fmt.Println("")
+	}
+	fmt.Println("")
+}
+
+func testaSite(site string) {
+
+	resp, _ := http.Get(site)
+
+	if resp.StatusCode == 200 {
+		fmt.Println("Site:", site, "foi carregado com sucesso!")
+	} else {
+		fmt.Println("Site:", site, "está com problemas. Status Code:", resp.StatusCode)
+	}
 }
